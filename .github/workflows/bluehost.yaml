@@ -1,0 +1,48 @@
+name: Bluehost deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Audit, additive upload, or reconciled deletion
+        type: choice
+        options: [audit, upload, delete]
+        default: audit
+      reconciled_inventory_sha256:
+        description: Required for delete; SHA-256 from a reviewed audit run
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: bluehost-production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.BLUEHOST_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.BLUEHOST_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/bluehost
+          chmod 600 ~/.ssh/bluehost
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Audit or deploy
+        env:
+          BLUEHOST_HOST: ${{ secrets.BLUEHOST_HOST }}
+          BLUEHOST_USER: ${{ secrets.BLUEHOST_USER }}
+          BLUEHOST_PATH: ${{ secrets.BLUEHOST_PATH }}
+          BLUEHOST_SSH_KEY: ~/.ssh/bluehost
+          BLUEHOST_RECONCILED_INVENTORY_SHA256: ${{ inputs.reconciled_inventory_sha256 }}
+        run: ./scripts/bluehost-deploy.sh "${{ inputs.mode }}"
+      - name: Upload inventory and rsync preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bluehost-deploy-audit-${{ github.run_id }}
+          path: dist/deploy-audit
+          if-no-files-found: warn

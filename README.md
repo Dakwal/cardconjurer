@@ -1,4 +1,25 @@
 # Card Conjurer
+
+This repository is maintained as a downstream fork of
+[`joshbirnholz/cardconjurer`](https://github.com/joshbirnholz/cardconjurer).
+Upstream `master` is merged through a scheduled, validated pull request; it is
+not copied or flattened, so the original history and static site layout remain
+intact.
+
+## Deployment
+
+`./scripts/package-site.sh` copies the deployable static site, including
+`.htaccess`, to `dist/client` without changing the source layout. Pull requests
+must pass the package validation workflow.
+
+Bluehost releases are manual and use the protected `bluehost-production`
+GitHub environment. Run the **Bluehost deployment** workflow in `audit` mode
+first, download and review its remote inventory and rsync preview, and add all
+approved server-only paths to `deploy/bluehost-preserve.txt`. An `upload` is
+additive. A `delete` deployment additionally requires the exact reviewed
+inventory SHA-256; it aborts if the server changed, creates a timestamped remote
+backup, protects reconciled paths, and only then enables `rsync --delete`.
+
 Card Conjurer was created by a passionate Magic the Gathering player and grew to become probably the most popular online card generator known to the game.
 In November of 2022, Wizards of the Coast served the original creator and webhost of the site with Ceas and Desist paperwork, forcing the site offline.
 This repository is for the purpose of making the application usable on your local machine and maintaining templates in perpetuity.
