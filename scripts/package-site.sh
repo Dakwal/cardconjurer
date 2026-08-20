@@ -21,6 +21,7 @@ rsync -a --delete \
   --exclude '/.github/' \
   --exclude '/.gitignore' \
   --exclude '/.dockerignore' \
+  --exclude '.DS_Store' \
   --exclude '/dist/' \
   --exclude '/scripts/' \
   --exclude '/deploy/' \

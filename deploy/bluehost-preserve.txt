@@ -2,3 +2,5 @@
 # Add every reconciled server-only path before authorizing a delete deployment.
 local_art/***
 .well-known/***
+.env
+.htpasswd
