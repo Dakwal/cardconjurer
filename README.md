@@ -18,7 +18,9 @@ first, download and review its remote inventory and rsync preview, and add all
 approved server-only paths to `deploy/bluehost-preserve.txt`. An `upload` is
 additive. A `delete` deployment additionally requires the exact reviewed
 inventory SHA-256; it aborts if the server changed, creates a timestamped remote
-backup, protects reconciled paths, and only then enables `rsync --delete`.
+backup, exports and verifies that backup in the GitHub run artifact, protects
+reconciled paths, and only then enables `rsync --delete`. The temporary remote
+archive is removed after verification so it does not consume Bluehost quota.
 
 Card Conjurer was created by a passionate Magic the Gathering player and grew to become probably the most popular online card generator known to the game.
 In November of 2022, Wizards of the Coast served the original creator and webhost of the site with Ceas and Desist paperwork, forcing the site offline.
