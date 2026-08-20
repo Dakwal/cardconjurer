@@ -16,7 +16,7 @@ mkdir -p "${destination}"
 
 # Card Conjurer is already a static site. Copy it without transforming its
 # HTML, CSS, JavaScript, data, assets, or Apache configuration.
-rsync -a --delete \
+rsync -a --delete --delete-excluded \
   --exclude '/.git/' \
   --exclude '/.github/' \
   --exclude '/.gitignore' \

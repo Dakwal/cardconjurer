@@ -27,6 +27,11 @@ for path in .git .github scripts deploy Dockerfile docker-compose.yml launcher.e
   fi
 done
 
+if find "${site_root}" -name .DS_Store -print -quit | grep -q .; then
+  echo "macOS .DS_Store metadata leaked into the deployable package" >&2
+  exit 1
+fi
+
 if find "${site_root}" -type l -print -quit | grep -q .; then
   echo "Symlinks are not allowed in the deployable package" >&2
   exit 1
