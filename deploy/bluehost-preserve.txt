@@ -1,0 +1,4 @@
+# One server-relative path per line. These paths are protected from deletion.
+# Add every reconciled server-only path before authorizing a delete deployment.
+local_art/***
+.well-known/***

@@ -1,0 +1,22 @@
+name: Validate deployable site
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package and validate static site
+        run: ./scripts/package-site.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: card-conjurer-client
+          path: dist/client
+          if-no-files-found: error

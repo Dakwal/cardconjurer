@@ -1,0 +1,56 @@
+name: Propose upstream sync
+
+on:
+  schedule:
+    - cron: '17 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch canonical upstream
+        run: |
+          git remote add upstream https://github.com/joshbirnholz/cardconjurer.git
+          git fetch --prune upstream master
+      - name: Merge upstream into synchronization branch
+        id: merge
+        run: |
+          if git merge-base --is-ancestor upstream/master HEAD; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git switch -C sync/upstream-master
+          git merge --no-edit --no-ff upstream/master
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+      - name: Validate merged site
+        if: steps.merge.outputs.changed == 'true'
+        run: ./scripts/package-site.sh
+      - name: Push synchronization branch
+        if: steps.merge.outputs.changed == 'true'
+        run: git push --force-with-lease origin sync/upstream-master
+      - name: Open or update synchronization pull request
+        if: steps.merge.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh pr view sync/upstream-master --json number >/dev/null 2>&1; then
+            gh pr create --draft \
+              --base master \
+              --head sync/upstream-master \
+              --title 'Sync joshbirnholz/cardconjurer master' \
+              --body 'Automated downstream sync. Review the upstream diff and required validation before merging.'
+          fi
